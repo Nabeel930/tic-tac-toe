@@ -10,9 +10,7 @@ function Square({ value, onSquareClick }: any) {
   );
 }
 
-function Board({xIsNext, squares, onPlay}: any) {
-  
-
+function Board({ xIsNext, squares, onPlay }: any) {
   function handelClick(i: any) {
     const nextSquares = squares.slice();
     if (nextSquares[i] || calculateWinner(squares)) {
@@ -35,89 +33,56 @@ function Board({xIsNext, squares, onPlay}: any) {
   }
 
   return (
-    <div className="p-0 m-5">
-      <div className="mb-5">{status}</div>
-      <div className="board-row">
-        <Square
-          value={squares[0]}
-          onSquareClick={() => {
-            handelClick(0);
-          }}
-        />
-        <Square
-          value={squares[1]}
-          onSquareClick={() => {
-            handelClick(1);
-          }}
-        />
-        <Square
-          value={squares[2]}
-          onSquareClick={() => {
-            handelClick(2);
-          }}
-        />
-      </div>
-      <div className="board-row">
-        <Square
-          value={squares[3]}
-          onSquareClick={() => {
-            handelClick(3);
-          }}
-        />
-        <Square
-          value={squares[4]}
-          onSquareClick={() => {
-            handelClick(4);
-          }}
-        />
-        <Square
-          value={squares[5]}
-          onSquareClick={() => {
-            handelClick(5);
-          }}
-        />
-      </div>
-      <div className="board-row">
-        <Square
-          value={squares[6]}
-          onSquareClick={() => {
-            handelClick(6);
-          }}
-        />
-        <Square
-          value={squares[7]}
-          onSquareClick={() => {
-            handelClick(7);
-          }}
-        />
-        <Square
-          value={squares[8]}
-          onSquareClick={() => {
-            handelClick(8);
-          }}
-        />
+    <div className="flex flex-col items-center justify-center">
+      <div className="text-xl mb-4">{status}</div>
+      <div className="grid grid-cols-3 gap-1">
+        {squares.map((square: any, i: any) => (
+          <Square key={i} value={square} onSquareClick={() => handelClick(i)} />
+        ))}
       </div>
     </div>
   );
 }
 
 export default function Game() {
-  const [xIsNext, setXIsNext] = useState(true);
   const [history, setHistory] = useState([Array(9).fill(null)]);
-  const currentSquares = history[history.length - 1];
+  const [currentMove, setCurrentMove] = useState(0);
+  const xIsNext = currentMove % 2 === 0;
+  const currentSquares = history[currentMove];
 
   function handPlay(nextSquares: any) {
-    setHistory([...history, nextSquares]);
-    setXIsNext(!xIsNext);
+    const nextHistory = [...history.slice(0, currentMove + 1), nextSquares];
+    setHistory(nextHistory);
+    setCurrentMove(nextHistory.length - 1);
   }
 
+  function jumpTO(nextMove: any) {
+    setCurrentMove(nextMove);
+  }
+
+  const moves = history.map((squares, move) => {
+    let description;
+    if (move > 0) {
+      description = "Go to move :" + move;
+    } else {
+      description = "Go to game start";
+    }
+    return (
+      <li key={move}>
+        <button onClick={() => jumpTO(move)}>{description}</button>
+      </li>
+    );
+  });
+
   return (
-    <div className="game flex flex-row">
-      <div className="game-board">
-        <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handPlay}/>
-      </div>
-      <div className="game-info ml-3">
-        <ol>{/*TODO*/}</ol>
+    <div className="h-screen flex items-center justify-center">
+      <div className="game flex flex-row">
+        <div className="game-board">
+          <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handPlay} />
+        </div>
+        <div className="game-info ml-3 mt-3">
+          <ol>{moves}</ol>
+        </div>
       </div>
     </div>
   );
